@@ -185,7 +185,7 @@ export default function Home() {
       <section className="py-20 md:py-32">
         <div className="container px-4 md:px-8">
           <div className="text-center mb-16">
-            <Badge className="mb-4">Why TaskBuddy</Badge>
+            <Badge className="mb-4">Why HomeSkill-Hub</Badge>
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
               Find Help or Earn Money
             </h2>

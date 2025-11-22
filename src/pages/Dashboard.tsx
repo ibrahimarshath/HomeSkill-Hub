@@ -21,6 +21,7 @@ type Task = {
   assignedToUserId?: number;
   acceptances?: Array<{ userId: number; acceptedAt: string }>;
   deadline?: string | null;
+  images?: string[];
 };
 
 type HelperInfo = {
@@ -278,6 +279,15 @@ export default function Dashboard() {
                       {statusLabel[task.status] || statusLabel.open}
                     </Badge>
                   </div>
+                  {task.images && task.images.length > 0 && (
+                    <div>
+                      <img
+                        src={`http://localhost:4001${task.images[0]}`}
+                        alt={task.title}
+                        className="w-full h-32 object-cover rounded-lg border border-border"
+                      />
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span>{task.urgency === "high" ? "Urgent" : task.urgency === "medium" ? "Moderate" : "Flexible"}</span>
@@ -362,6 +372,15 @@ export default function Dashboard() {
                       {statusLabel[task.status] || statusLabel.assigned}
                     </Badge>
                   </div>
+                  {task.images && task.images.length > 0 && (
+                    <div>
+                      <img
+                        src={`http://localhost:4001${task.images[0]}`}
+                        alt={task.title}
+                        className="w-full h-32 object-cover rounded-lg border border-border"
+                      />
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span>{task.urgency === "high" ? "Urgent" : task.urgency === "medium" ? "Moderate" : "Flexible"}</span>

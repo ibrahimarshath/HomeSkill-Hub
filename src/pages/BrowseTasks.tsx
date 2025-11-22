@@ -29,6 +29,7 @@ type UiTask = {
   latitude?: number | null;
   longitude?: number | null;
   deadline?: string | null;
+  images?: string[];
 };
 
 function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -141,6 +142,7 @@ export default function BrowseTasks() {
             latitude: typeof t.latitude === "number" ? t.latitude : null,
             longitude: typeof t.longitude === "number" ? t.longitude : null,
             deadline: t.deadline || null,
+            images: Array.isArray(t.images) ? t.images : [],
           };
         });
         setTasks(mapped);
@@ -372,6 +374,15 @@ export default function BrowseTasks() {
               <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
                 {task.title}
               </h3>
+              {task.images && task.images.length > 0 && (
+                <div className="mb-3">
+                  <img
+                    src={`http://localhost:4001${task.images[0]}`}
+                    alt={task.title}
+                    className="w-full h-48 object-cover rounded-lg border border-border"
+                  />
+                </div>
+              )}
               <p className="text-sm text-muted-foreground mb-4">{task.description}</p>
 
               <div className="space-y-2 mb-4">
@@ -447,6 +458,28 @@ export default function BrowseTasks() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
+                  {selectedTask.images && selectedTask.images.length > 0 && (
+                    <div className="space-y-2">
+                      {selectedTask.images.length === 1 ? (
+                        <img
+                          src={`http://localhost:4001${selectedTask.images[0]}`}
+                          alt={selectedTask.title}
+                          className="w-full h-64 object-cover rounded-lg border border-border"
+                        />
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          {selectedTask.images.map((img, idx) => (
+                            <img
+                              key={idx}
+                              src={`http://localhost:4001${img}`}
+                              alt={`${selectedTask.title} - Image ${idx + 1}`}
+                              className="w-full h-32 object-cover rounded-lg border border-border"
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <p className="text-sm text-muted-foreground">
                     {selectedTask.description}
                   </p>

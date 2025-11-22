@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, Shield, DollarSign, MapPin } from "lucide-react";
+import { AlertCircle, Clock, Shield, DollarSign, MapPin, Image as ImageIcon, X } from "lucide-react";
 import { apiFetch } from "@/context/AuthContext";
 
 export default function PostTask() {
@@ -26,6 +26,10 @@ export default function PostTask() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleUseMyLocation = () => {
@@ -44,6 +48,62 @@ export default function PostTask() {
         setError("Could not get your current location.");
       }
     );
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    if (selectedImages.length + files.length > 5) {
+      setError("You can upload a maximum of 5 images.");
+      return;
+    }
+
+    const validFiles = files.filter((file) => {
+      const isValidType = file.type.startsWith("image/");
+      const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+      if (!isValidType) {
+        setError(`${file.name} is not a valid image file.`);
+        return false;
+      }
+      if (!isValidSize) {
+        setError(`${file.name} is too large. Maximum size is 5MB.`);
+        return false;
+      }
+      return true;
+    });
+
+    setSelectedImages([...selectedImages, ...validFiles]);
+    
+    // Create previews
+    validFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(selectedImages.filter((_, i) => i !== index));
+    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    if (selectedImages.length === 0) return [];
+
+    const formData = new FormData();
+    selectedImages.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    const response = await apiFetch("/api/tasks/upload-images", {
+      method: "POST",
+      body: formData,
+      headers: {}, // Let browser set Content-Type for FormData
+    });
+
+    return response.imageUrls || [];
   };
 
   const onSubmit = async (e: FormEvent) => {
@@ -65,6 +125,9 @@ export default function PostTask() {
 
     setLoading(true);
     try {
+      // Upload images first
+      const imageUrls = await uploadImages();
+      
       await apiFetch("/api/tasks", {
         method: "POST",
         body: JSON.stringify({
@@ -79,10 +142,11 @@ export default function PostTask() {
           deadline: deadlineDate.toISOString(),
           latitude: latitude ?? undefined,
           longitude: longitude ?? undefined,
+          images: imageUrls,
         }),
       });
       setSuccess("Task posted successfully.");
-      // Optionally clear form
+      // Clear form
       setTitle("");
       setDescription("");
       setCategory("");
@@ -94,6 +158,12 @@ export default function PostTask() {
       setVerifiedOnly(false);
       setLatitude(null);
       setLongitude(null);
+      setSelectedImages([]);
+      setImagePreviews([]);
+      setUploadedImageUrls([]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       // Navigate to dashboard to view posted tasks
       navigate("/dashboard");
     } catch (err: any) {
@@ -143,6 +213,48 @@ export default function PostTask() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="images" className="text-base flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Photos (Optional - up to 5 images)
+                </Label>
+                <Input
+                  id="images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={fileInputRef}
+                  onChange={handleImageSelect}
+                  className="mt-2"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Add photos to help helpers understand the task better. Max 5 images, 5MB each.
+                </p>
+                
+                {imagePreviews.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg border border-border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">

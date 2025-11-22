@@ -20,6 +20,13 @@
       "name": "IBRAHIM",
       "email": "ibrahim.a@atriauniversity.edu.in",
       "passwordHash": "$2a$10$qfPK2h2334Gv7yl45wpIDeP.iPlR87B1d5l6RahLxtjhSq7C9dRMu"
+    },
+    {
+      "id": 4,
+      "createdAt": "2025-11-22T03:54:54.900Z",
+      "name": "ibrahim",
+      "email": "mohammedibrahimarshath.mr@atriauniversity.edu.in",
+      "passwordHash": "$2a$10$09l6p3Zsdsi193aRUeh4yORHilt/MMHMGhU/9MxBZ7CtTsocq39Mi"
     }
   ],
   "tasks": [
@@ -116,6 +123,26 @@
       ],
       "assignedToUserId": 1,
       "completedAt": "2025-11-21T23:34:26.289Z"
+    },
+    {
+      "id": 5,
+      "createdAt": "2025-11-22T04:07:40.651Z",
+      "status": "open",
+      "title": "bathroom",
+      "description": "cleaning ",
+      "category": "home",
+      "urgency": "medium",
+      "location": "sda",
+      "budget": "555",
+      "womenSafe": false,
+      "verifiedOnly": false,
+      "deadline": "2025-11-23T07:10:00.000Z",
+      "posterId": 4,
+      "latitude": 12.9564672,
+      "longitude": 77.594624,
+      "images": [
+        "/uploads/task-1763784460621-6537519.jpg"
+      ]
     }
   ],
   "profiles": [],
@@ -141,8 +168,8 @@
     }
   ],
   "_counters": {
-    "userId": 4,
-    "taskId": 5,
+    "userId": 5,
+    "taskId": 6,
     "profileId": 1,
     "reviewId": 2,
     "ratingId": 2

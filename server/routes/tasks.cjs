@@ -1,4 +1,7 @@
 const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const { authMiddleware } = require("../middleware/auth.cjs");
 const {
   createTask,
@@ -9,6 +12,39 @@ const {
 } = require("../db.cjs");
 
 const router = express.Router();
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, "../uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `task-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error("Only image files (jpeg, jpg, png, gif, webp) are allowed!"));
+    }
+  },
+});
 
 // Public: list tasks with basic filters
 router.get("/", (req, res) => {
@@ -42,9 +78,23 @@ router.get("/", (req, res) => {
   res.json(tasks);
 });
 
+// Image upload endpoint
+router.post("/upload-images", authMiddleware, upload.array("images", 5), (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No images uploaded" });
+    }
+
+    const imageUrls = req.files.map((file) => `/uploads/${file.filename}`);
+    res.json({ imageUrls });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to upload images" });
+  }
+});
+
 // Auth required: create task
 router.post("/", authMiddleware, (req, res) => {
-  const { title, description, category, urgency, location, budget, womenSafe, verifiedOnly, latitude, longitude, deadline } = req.body;
+  const { title, description, category, urgency, location, budget, womenSafe, verifiedOnly, latitude, longitude, deadline, images } = req.body;
 
   if (!title || !description || !category || !urgency || !location || !deadline) {
     return res.status(400).json({ message: "Missing required fields" });
@@ -66,6 +116,7 @@ router.post("/", authMiddleware, (req, res) => {
     posterId: req.user.id,
     latitude: latNum,
     longitude: lngNum,
+    images: images || [], // Array of image URLs
   });
 
   res.status(201).json(task);

@@ -19,12 +19,18 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 const API_BASE = "http://localhost:4001";
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
+  // Don't set Content-Type for FormData - let browser set it with boundary
+  const isFormData = options.body instanceof FormData;
+  const headers: HeadersInit = isFormData
+    ? { ...(options.headers || {}) }
+    : {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      };
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
+    headers,
     credentials: "include",
   });
 
