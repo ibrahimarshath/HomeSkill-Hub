@@ -27,6 +27,24 @@
       "name": "ibrahim",
       "email": "mohammedibrahimarshath.mr@atriauniversity.edu.in",
       "passwordHash": "$2a$10$09l6p3Zsdsi193aRUeh4yORHilt/MMHMGhU/9MxBZ7CtTsocq39Mi"
+    },
+    {
+      "id": 5,
+      "createdAt": "2025-11-22T05:04:41.010Z",
+      "name": "ia",
+      "email": "iathegod.28@gmail.com",
+      "passwordHash": "$2a$10$yR/V664pRKJqyvafAvBbjehgKElYgetuw4v8BBROhb6TqC19DjM3C"
+    },
+    {
+      "id": 6,
+      "createdAt": "2025-11-22T06:06:32.109Z",
+      "firstName": "M R Mohammed Ibrahim",
+      "lastName": "Arshath",
+      "gender": "male",
+      "phoneNumber": "9844533472",
+      "name": "M R Mohammed Ibrahim Arshath",
+      "email": "dibrahimarshath.mr@atriauniversity.edu.in",
+      "passwordHash": "$2a$10$k2SEFWB5Z2XdfRQcqoUbpOhWKXibyPVEVwqUhlGDh.6BgMODn7By2"
     }
   ],
   "tasks": [
@@ -97,6 +115,10 @@
         {
           "userId": 1,
           "acceptedAt": "2025-11-21T23:27:25.995Z"
+        },
+        {
+          "userId": 4,
+          "acceptedAt": "2025-11-22T04:57:47.502Z"
         }
       ]
     },
@@ -123,26 +145,6 @@
       ],
       "assignedToUserId": 1,
       "completedAt": "2025-11-21T23:34:26.289Z"
-    },
-    {
-      "id": 5,
-      "createdAt": "2025-11-22T04:07:40.651Z",
-      "status": "open",
-      "title": "bathroom",
-      "description": "cleaning ",
-      "category": "home",
-      "urgency": "medium",
-      "location": "sda",
-      "budget": "555",
-      "womenSafe": false,
-      "verifiedOnly": false,
-      "deadline": "2025-11-23T07:10:00.000Z",
-      "posterId": 4,
-      "latitude": 12.9564672,
-      "longitude": 77.594624,
-      "images": [
-        "/uploads/task-1763784460621-6537519.jpg"
-      ]
     }
   ],
   "profiles": [],
@@ -155,6 +157,15 @@
       "taskId": 4,
       "comment": "ebuzenphrnWURnjeipozjtpoeJtjW{(",
       "score": 5
+    },
+    {
+      "id": 2,
+      "createdAt": "2025-11-22T05:06:27.224Z",
+      "toUserId": 5,
+      "fromUserId": 4,
+      "taskId": 5,
+      "comment": "dddg",
+      "score": 4
     }
   ],
   "ratings": [
@@ -165,13 +176,34 @@
       "fromUserId": 2,
       "score": 5,
       "taskId": 4
+    },
+    {
+      "id": 2,
+      "createdAt": "2025-11-22T05:06:27.211Z",
+      "toUserId": 5,
+      "fromUserId": 4,
+      "score": 4,
+      "taskId": 5
     }
   ],
   "_counters": {
-    "userId": 5,
-    "taskId": 6,
+    "userId": 7,
+    "taskId": 8,
     "profileId": 1,
-    "reviewId": 2,
-    "ratingId": 2
-  }
+    "reviewId": 3,
+    "ratingId": 3,
+    "messageId": 2
+  },
+  "messages": [
+    {
+      "id": 1,
+      "createdAt": "2025-11-22T05:23:14.766Z",
+      "taskId": 6,
+      "fromUserId": 4,
+      "toUserId": 4,
+      "message": "hlo",
+      "mediaType": null,
+      "mediaUrl": null
+    }
+  ]
 }

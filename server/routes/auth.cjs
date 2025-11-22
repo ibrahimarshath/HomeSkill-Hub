@@ -9,10 +9,10 @@ const router = express.Router();
 
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { firstName, lastName, gender, phoneNumber, email, password } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "Name, email, and password are required" });
+    if (!firstName || !lastName || !gender || !phoneNumber || !email || !password) {
+      return res.status(400).json({ message: "First name, last name, gender, phone number, email, and password are required" });
     }
 
     const existing = findUserByEmail(email);
@@ -21,8 +21,13 @@ router.post("/signup", async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
+    const name = `${firstName} ${lastName}`;
 
     const user = createUser({
+      firstName,
+      lastName,
+      gender,
+      phoneNumber,
       name,
       email,
       passwordHash,
@@ -91,7 +96,15 @@ router.get("/me", authMiddleware, (req, res) => {
     return res.status(401).json({ message: "User no longer exists" });
   }
 
-  return res.json({ id: user.id, name: user.name, email: user.email });
+  return res.json({ 
+    id: user.id, 
+    name: user.name, 
+    email: user.email,
+    firstName: user.firstName || null,
+    lastName: user.lastName || null,
+    gender: user.gender || null,
+    phoneNumber: user.phoneNumber || null,
+  });
 });
 
 module.exports = router;

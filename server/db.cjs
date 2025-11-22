@@ -11,12 +11,14 @@ function ensureDbFile() {
       profiles: [],
       reviews: [],
       ratings: [],
+      messages: [],
       _counters: {
         userId: 1,
         taskId: 1,
         profileId: 1,
         reviewId: 1,
         ratingId: 1,
+        messageId: 1,
       },
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
@@ -30,19 +32,24 @@ function normalizeCounters(db) {
     profileId: 1,
     reviewId: 1,
     ratingId: 1,
+    messageId: 1,
   };
+
+  if (!db.messages) db.messages = [];
 
   const maxUserId = db.users.reduce((m, u) => Math.max(m, u.id || 0), 0);
   const maxTaskId = db.tasks.reduce((m, t) => Math.max(m, t.id || 0), 0);
   const maxProfileId = db.profiles.reduce((m, p) => Math.max(m, p.id || 0), 0);
   const maxReviewId = db.reviews.reduce((m, r) => Math.max(m, r.id || 0), 0);
   const maxRatingId = db.ratings.reduce((m, r) => Math.max(m, r.id || 0), 0);
+  const maxMessageId = db.messages.reduce((m, msg) => Math.max(m, msg.id || 0), 0);
 
   if (db._counters.userId < maxUserId + 1) db._counters.userId = maxUserId + 1;
   if (db._counters.taskId < maxTaskId + 1) db._counters.taskId = maxTaskId + 1;
   if (db._counters.profileId < maxProfileId + 1) db._counters.profileId = maxProfileId + 1;
   if (db._counters.reviewId < maxReviewId + 1) db._counters.reviewId = maxReviewId + 1;
   if (db._counters.ratingId < maxRatingId + 1) db._counters.ratingId = maxRatingId + 1;
+  if (db._counters.messageId < maxMessageId + 1) db._counters.messageId = maxMessageId + 1;
 }
 
 function readDb() {
@@ -84,6 +91,15 @@ function getUserById(id) {
   return db.users.find((u) => u.id === id) || null;
 }
 
+function updateUser(id, updates) {
+  const db = readDb();
+  const idx = db.users.findIndex((u) => u.id === id);
+  if (idx === -1) return null;
+  db.users[idx] = { ...db.users[idx], ...updates };
+  writeDb(db);
+  return db.users[idx];
+}
+
 // Task helpers
 function createTask(task) {
   const db = readDb();
@@ -121,6 +137,15 @@ function updateTask(id, updates) {
   db.tasks[idx] = { ...db.tasks[idx], ...updates };
   writeDb(db);
   return db.tasks[idx];
+}
+
+function deleteTask(id) {
+  const db = readDb();
+  const idx = db.tasks.findIndex((t) => t.id === id);
+  if (idx === -1) return null;
+  const deleted = db.tasks.splice(idx, 1)[0];
+  writeDb(db);
+  return deleted;
 }
 
 // Profile helpers
@@ -179,21 +204,42 @@ function getRatingsForUser(userId) {
   return db.ratings.filter((r) => r.toUserId === userId);
 }
 
+// Chat helpers
+function addMessage(message) {
+  const db = readDb();
+  const id = nextId(db, "messageId");
+  const newMessage = { id, createdAt: new Date().toISOString(), ...message };
+  db.messages.push(newMessage);
+  writeDb(db);
+  return newMessage;
+}
+
+function getMessagesForTask(taskId) {
+  const db = readDb();
+  return db.messages.filter((m) => m.taskId === taskId).sort((a, b) => 
+    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+}
+
 module.exports = {
   readDb,
   writeDb,
   findUserByEmail,
   createUser,
   getUserById,
+  updateUser,
   createTask,
   getAllTasks,
   getTasksByPosterId,
   getTasksByAssigneeId,
   updateTask,
+  deleteTask,
   upsertProfile,
   getProfileByUserId,
   addReview,
   getReviewsForUser,
   addRating,
   getRatingsForUser,
+  addMessage,
+  getMessagesForTask,
 };

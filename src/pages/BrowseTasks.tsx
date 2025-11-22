@@ -7,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Search, MapPin, Clock, Star, Shield, AlertCircle, Briefcase, Home, Wrench, BookOpen, Palette, Heart } from "lucide-react";
+import { Search, MapPin, Clock, Star, Shield, AlertCircle, Briefcase, Home, Wrench, BookOpen, Palette, Heart, MessageSquare } from "lucide-react";
 import { apiFetch, useAuth } from "@/context/AuthContext";
 import { UserRatingBadge } from "@/components/UserRatingBadge";
+import { FloatingChat } from "@/components/FloatingChat";
 import { Link } from "react-router-dom";
 
 type UiTask = {
@@ -30,6 +31,7 @@ type UiTask = {
   longitude?: number | null;
   deadline?: string | null;
   images?: string[];
+  assignedToUserId?: number | null;
 };
 
 function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -112,6 +114,10 @@ export default function BrowseTasks() {
   const [userLng, setUserLng] = useState<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<UiTask | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [chatTaskId, setChatTaskId] = useState<number | null>(null);
+  const [chatOtherUserId, setChatOtherUserId] = useState<number | null>(null);
+  const [chatOtherUserName, setChatOtherUserName] = useState("");
+  const [chatTaskTitle, setChatTaskTitle] = useState("");
 
   const { user } = useAuth();
 
@@ -143,6 +149,7 @@ export default function BrowseTasks() {
             longitude: typeof t.longitude === "number" ? t.longitude : null,
             deadline: t.deadline || null,
             images: Array.isArray(t.images) ? t.images : [],
+            assignedToUserId: typeof t.assignedToUserId === "number" ? t.assignedToUserId : null,
           };
         });
         setTasks(mapped);
@@ -371,11 +378,11 @@ export default function BrowseTasks() {
                 </div>
               </div>
 
-              <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+              <h3 className="font-semibold text-lg mb-3 group-hover:text-primary transition-colors">
                 {task.title}
               </h3>
               {task.images && task.images.length > 0 && (
-                <div className="mb-3">
+                <div className="mb-4">
                   <img
                     src={`http://localhost:4001${task.images[0]}`}
                     alt={task.title}
@@ -383,15 +390,23 @@ export default function BrowseTasks() {
                   />
                 </div>
               )}
-              <p className="text-sm text-muted-foreground mb-4">{task.description}</p>
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed line-clamp-3">
+                {task.description}
+              </p>
 
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  {task.location}
+              <div className="space-y-3 mb-4 pt-3 border-t">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground font-medium">{task.location}</span>
                 </div>
-                <div className="flex items-center text-sm">
-                  <span className="font-semibold text-primary">{task.price}</span>
+                <div className="flex items-center gap-2 text-base">
+                  <span className="font-bold text-primary text-lg">
+                    {task.price === "Not specified" 
+                      ? task.price 
+                      : task.price.toString().includes('₹') 
+                        ? task.price 
+                        : `₹${task.price.toString().replace(/[₹Rs.\s]/gi, '')}`}
+                  </span>
                 </div>
                 {task.deadline && (
                   <div className="flex items-center text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 w-fit">
@@ -480,22 +495,30 @@ export default function BrowseTasks() {
                       )}
                     </div>
                   )}
-                  <p className="text-sm text-muted-foreground">
-                    {selectedTask.description}
-                  </p>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-foreground leading-relaxed">
+                      {selectedTask.description}
+                    </p>
+                  </div>
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <Badge className={getUrgencyColor(selectedTask.urgency)}>
                         {getUrgencyLabel(selectedTask.urgency)}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      <span>{selectedTask.location}</span>
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="font-medium">{selectedTask.location}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-primary">{selectedTask.price}</span>
+                    <div className="flex items-center gap-2 text-base pt-1">
+                      <span className="font-bold text-primary text-lg">
+                        {selectedTask.price === "Not specified" 
+                          ? selectedTask.price 
+                          : selectedTask.price.toString().includes('₹') 
+                            ? selectedTask.price 
+                            : `₹${selectedTask.price.toString().replace(/[₹Rs.\s]/gi, '')}`}
+                      </span>
                     </div>
                     {selectedTask.deadline && (
                       <div className="flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 text-xs">
@@ -547,7 +570,12 @@ export default function BrowseTasks() {
                                   method: "POST",
                                 });
                                 setSelectedTask({ ...selectedTask, status: updated.status });
-                                alert("Task accepted! Waiting for owner to assign you.");
+                                // Open floating chat
+                                setChatTaskId(selectedTask.id);
+                                setChatOtherUserId(selectedTask.posterId);
+                                setChatOtherUserName(selectedTask.poster);
+                                setChatTaskTitle(selectedTask.title);
+                                alert("Task accepted! Waiting for owner to assign you. Chat is now open.");
                               } catch (err: any) {
                                 // Simple inline error state
                                 alert(err?.message || "Failed to accept task");
@@ -564,6 +592,27 @@ export default function BrowseTasks() {
                       )}
                     </div>
                   )}
+                  
+                  {/* Chat Button - Opens floating chat */}
+                  {user && selectedTask.posterId != null && (
+                    (selectedTask.status === "assigned" || selectedTask.status === "pending_approval" || selectedTask.status === "completed" || selectedTask.status === "accepted") && (
+                      <div className="pt-4 border-t mt-4">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            setChatTaskId(selectedTask.id);
+                            setChatOtherUserId(user.id === selectedTask.posterId ? (selectedTask as any).assignedToUserId || selectedTask.posterId : selectedTask.posterId);
+                            setChatOtherUserName(user.id === selectedTask.posterId ? "Helper" : selectedTask.poster);
+                            setChatTaskTitle(selectedTask.title);
+                          }}
+                        >
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Open Chat
+                        </Button>
+                      </div>
+                    )
+                  )}
                 </div>
               </>
             )}
@@ -577,6 +626,15 @@ export default function BrowseTasks() {
           </Button>
         </div>
       </div>
+
+      {/* Floating Chat */}
+      <FloatingChat
+        taskId={chatTaskId}
+        otherUserId={chatOtherUserId}
+        otherUserName={chatOtherUserName}
+        taskTitle={chatTaskTitle}
+        position="right"
+      />
     </div>
   );
 }

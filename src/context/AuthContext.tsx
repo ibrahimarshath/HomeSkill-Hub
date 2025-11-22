@@ -9,7 +9,7 @@ export type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  signup: (data: { name: string; email: string; password: string }) => Promise<void>;
+  signup: (data: { firstName: string; lastName: string; gender: string; phoneNumber: string; email: string; password: string }) => Promise<void>;
   login: (data: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -62,10 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  const signup: AuthContextValue["signup"] = async ({ name, email, password }) => {
+  const signup: AuthContextValue["signup"] = async ({ firstName, lastName, gender, phoneNumber, email, password }) => {
     const data = await apiFetch("/api/auth/signup", {
       method: "POST",
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ firstName, lastName, gender, phoneNumber, email, password }),
     });
     setUser(data);
   };

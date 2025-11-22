@@ -7,6 +7,7 @@ const authRoutes = require("./routes/auth.cjs");
 const taskRoutes = require("./routes/tasks.cjs");
 const userRoutes = require("./routes/users.cjs");
 const ratingRoutes = require("./routes/ratings.cjs");
+const chatRoutes = require("./routes/chat.cjs");
 
 const PORT = process.env.PORT || 4001;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
@@ -38,6 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ratings", ratingRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);

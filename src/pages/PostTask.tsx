@@ -8,21 +8,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Clock, Shield, DollarSign, MapPin, Image as ImageIcon, X } from "lucide-react";
+import { AlertCircle, Clock, Shield, MapPin, Image as ImageIcon, X } from "lucide-react";
 import { apiFetch } from "@/context/AuthContext";
+import { RupeeIcon } from "@/components/RupeeIcon";
 
 export default function PostTask() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [urgency, setUrgency] = useState("");
   const [location, setLocation] = useState("");
   const [budget, setBudget] = useState("");
   const [womenSafe, setWomenSafe] = useState(false);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [deadline, setDeadline] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const [googleMapsLink, setGoogleMapsLink] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -32,22 +34,19 @@ export default function PostTask() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const handleUseMyLocation = () => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser.");
-      return;
-    }
-    setError(null);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLatitude(pos.coords.latitude);
-        setLongitude(pos.coords.longitude);
-        setSuccess("Location captured for this task.");
-      },
-      () => {
-        setError("Could not get your current location.");
+  const handleGoogleMapsLinkChange = (link: string) => {
+    setGoogleMapsLink(link);
+    // Try to extract coordinates from Google Maps link if it's a share link
+    // Format: https://www.google.com/maps?q=lat,lng or https://maps.google.com/?q=lat,lng
+    const match = link.match(/[?&]q=([+-]?\d+\.?\d*),([+-]?\d+\.?\d*)/);
+    if (match) {
+      const lat = parseFloat(match[1]);
+      const lng = parseFloat(match[2]);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        setLatitude(lat);
+        setLongitude(lng);
       }
-    );
+    }
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +115,11 @@ export default function PostTask() {
       return;
     }
 
+    if (category === "other" && !customCategory.trim()) {
+      setError("Please enter a custom category.");
+      return;
+    }
+
     // Validate deadline is in future
     const deadlineDate = new Date(deadline);
     if (deadlineDate <= new Date()) {
@@ -133,16 +137,16 @@ export default function PostTask() {
         body: JSON.stringify({
           title,
           description,
-          category,
+          category: category === "other" ? customCategory : category,
           urgency,
           location,
           budget: budget || null,
           womenSafe,
-          verifiedOnly,
           deadline: deadlineDate.toISOString(),
           latitude: latitude ?? undefined,
           longitude: longitude ?? undefined,
           images: imageUrls,
+          googleMapsLink: googleMapsLink || null,
         }),
       });
       setSuccess("Task posted successfully.");
@@ -150,14 +154,15 @@ export default function PostTask() {
       setTitle("");
       setDescription("");
       setCategory("");
+      setCustomCategory("");
       setUrgency("");
       setLocation("");
       setBudget("");
       setDeadline("");
       setWomenSafe(false);
-      setVerifiedOnly(false);
       setLatitude(null);
       setLongitude(null);
+      setGoogleMapsLink("");
       setSelectedImages([]);
       setImagePreviews([]);
       setUploadedImageUrls([]);
@@ -260,7 +265,12 @@ export default function PostTask() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <Label htmlFor="category" className="text-base">Category *</Label>
-                  <Select value={category} onValueChange={setCategory}>
+                  <Select value={category} onValueChange={(value) => {
+                    setCategory(value);
+                    if (value !== "other") {
+                      setCustomCategory("");
+                    }
+                  }}>
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -271,8 +281,19 @@ export default function PostTask() {
                       <SelectItem value="repair">Repair & Maintenance</SelectItem>
                       <SelectItem value="care">Care & Support</SelectItem>
                       <SelectItem value="creative">Creative Services</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
+                  {category === "other" && (
+                    <Input
+                      id="customCategory"
+                      placeholder="Enter your category"
+                      className="mt-2"
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      required
+                    />
+                  )}
                 </div>
 
                 <div>
@@ -330,17 +351,12 @@ export default function PostTask() {
             <div className="space-y-6 pt-6 border-t">
               <h3 className="text-xl font-semibold flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
-                Location & Budget
+                Location & Price
               </h3>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="location" className="text-base flex items-center justify-between gap-2">
-                  <span>Location *</span>
-                  <Button type="button" variant="outline" size="sm" onClick={handleUseMyLocation}>
-                    Use my location
-                  </Button>
-                </Label>
+                <Label htmlFor="location" className="text-base">Location *</Label>
                 <Input
                   id="location"
                   placeholder="Enter your area/neighborhood"
@@ -348,25 +364,45 @@ export default function PostTask() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="googleMapsLink" className="text-base flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Google Maps Link (Optional)
+                </Label>
+                <Input
+                  id="googleMapsLink"
+                  placeholder="Paste Google Maps link here (e.g., https://maps.google.com/?q=12.9716,77.5946)"
+                  className="mt-2"
+                  value={googleMapsLink}
+                  onChange={(e) => handleGoogleMapsLinkChange(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Paste a Google Maps share link to help helpers find your location easily
+                </p>
                 {latitude && longitude && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Lat: {latitude.toFixed(4)}, Lng: {longitude.toFixed(4)}
+                  <p className="mt-1 text-xs text-green-600">
+                    ✓ Coordinates extracted: {latitude.toFixed(6)}, {longitude.toFixed(6)}
                   </p>
                 )}
               </div>
 
               <div>
                   <Label htmlFor="budget" className="text-base flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Budget Range
+                    <RupeeIcon className="h-4 w-4" />
+                    Fixed Price
                   </Label>
                   <Input
                     id="budget"
-                    placeholder="e.g., $50 - $100"
+                    placeholder="e.g., ₹500"
                     className="mt-2"
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
                   />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Enter the fixed price in rupees you're willing to pay for this task
+                  </p>
                 </div>
               </div>
             </div>
@@ -395,27 +431,6 @@ export default function PostTask() {
                     <p className="text-sm text-muted-foreground">
                       Only show this task to verified women providers or allow women-only applications.
                       This helps ensure a safer environment for female task posters.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6 bg-primary/5 border-primary/20">
-                <div className="flex items-start gap-4">
-                  <AlertCircle className="h-5 w-5 text-primary mt-1" />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <Label htmlFor="verified-only" className="text-base font-semibold">
-                        Verified Providers Only
-                      </Label>
-                      <Switch
-                        id="verified-only"
-                        checked={verifiedOnly}
-                        onCheckedChange={setVerifiedOnly}
-                      />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Only allow applications from identity-verified community members
                     </p>
                   </div>
                 </div>
@@ -450,7 +465,7 @@ export default function PostTask() {
           </h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• Be specific about what you need - clear descriptions get better responses</li>
-            <li>• Set realistic budgets based on the complexity of the task</li>
+            <li>• Set a fair fixed price based on the complexity of the task</li>
             <li>• Use urgency levels appropriately to attract the right helpers</li>
             <li>• Enable safety features if working with sensitive situations</li>
             <li>• Respond promptly to applications to keep community trust high</li>

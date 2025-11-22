@@ -10,8 +10,8 @@ import {
   Star,
   Shield,
   Clock,
-  DollarSign,
 } from "lucide-react";
+import { RupeeIcon } from "@/components/RupeeIcon";
 
 export default function HowItWorks() {
   const steps = [
@@ -53,9 +53,9 @@ export default function HowItWorks() {
       description: "Enable women-only options and verified providers filters",
     },
     {
-      icon: DollarSign,
+      icon: RupeeIcon,
       title: "Fair Pricing",
-      description: "Set your budget and negotiate directly with providers",
+      description: "Set your fixed price in rupees and connect with providers",
     },
   ];
 
@@ -71,9 +71,9 @@ export default function HowItWorks() {
       description: "All clients are verified members of the community",
     },
     {
-      icon: DollarSign,
+      icon: RupeeIcon,
       title: "Earn Fairly",
-      description: "Set your rates and work on your own schedule",
+      description: "Earn in rupees and work on your own schedule",
     },
   ];
 

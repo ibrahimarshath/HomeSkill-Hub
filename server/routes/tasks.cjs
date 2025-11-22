@@ -9,6 +9,7 @@ const {
   getTasksByPosterId,
   getTasksByAssigneeId,
   updateTask,
+  deleteTask,
 } = require("../db.cjs");
 
 const router = express.Router();
@@ -50,6 +51,9 @@ const upload = multer({
 router.get("/", (req, res) => {
   const { search, category, urgency } = req.query;
   let tasks = getAllTasks();
+  
+  // Filter out completed tasks - they should not appear in browse
+  tasks = tasks.filter((t) => t.status !== "completed");
   
   // Filter out expired tasks
   const now = new Date();
@@ -94,7 +98,7 @@ router.post("/upload-images", authMiddleware, upload.array("images", 5), (req, r
 
 // Auth required: create task
 router.post("/", authMiddleware, (req, res) => {
-  const { title, description, category, urgency, location, budget, womenSafe, verifiedOnly, latitude, longitude, deadline, images } = req.body;
+  const { title, description, category, urgency, location, budget, womenSafe, latitude, longitude, deadline, images, googleMapsLink } = req.body;
 
   if (!title || !description || !category || !urgency || !location || !deadline) {
     return res.status(400).json({ message: "Missing required fields" });
@@ -111,12 +115,12 @@ router.post("/", authMiddleware, (req, res) => {
     location,
     budget: budget || null,
     womenSafe: !!womenSafe,
-    verifiedOnly: !!verifiedOnly,
     deadline: deadline || null,
     posterId: req.user.id,
     latitude: latNum,
     longitude: lngNum,
     images: images || [], // Array of image URLs
+    googleMapsLink: googleMapsLink || null,
   });
 
   res.status(201).json(task);
@@ -266,6 +270,31 @@ router.post("/:id/complete", authMiddleware, (req, res) => {
   });
 
   res.json(updated);
+});
+
+// Auth required: delete task (only owner can delete)
+router.delete("/:id", authMiddleware, (req, res) => {
+  const id = Number(req.params.id);
+  if (!id) {
+    return res.status(400).json({ message: "Invalid task id" });
+  }
+
+  const existing = updateTask(id, {});
+  if (!existing) {
+    return res.status(404).json({ message: "Task not found" });
+  }
+
+  // Only task owner can delete
+  if (existing.posterId !== req.user.id) {
+    return res.status(403).json({ message: "Only task owner can delete tasks" });
+  }
+
+  const deleted = deleteTask(id);
+  if (!deleted) {
+    return res.status(404).json({ message: "Task not found" });
+  }
+
+  res.json({ message: "Task deleted successfully" });
 });
 
 module.exports = router;

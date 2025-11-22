@@ -89,9 +89,6 @@ export default function WomenSafety() {
               in our community, whether posting tasks or providing services.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-safe hover:bg-safe/90 text-lg">
-                Get Verified
-              </Button>
               <Link to="/browse">
                 <Button size="lg" variant="outline" className="text-lg">
                   Browse Safe Tasks
@@ -225,22 +222,6 @@ export default function WomenSafety() {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-safe to-safe/80 text-white">
-        <div className="container px-4 md:px-8 text-center">
-          <Shield className="h-16 w-16 mx-auto mb-6 opacity-90" />
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Join Our Safe Community
-          </h2>
-          <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto mb-8">
-            Thousands of women trust our platform every day. Start your verification today.
-          </p>
-          <Button size="lg" variant="secondary" className="text-lg">
-            Get Started Now
-          </Button>
         </div>
       </section>
     </div>

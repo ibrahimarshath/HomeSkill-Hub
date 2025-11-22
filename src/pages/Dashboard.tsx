@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Clock, MapPin, CheckCircle2, ListChecks, AlertCircle, User, CheckCheck, Star, MessageSquare } from "lucide-react";
+import { Clock, MapPin, CheckCircle2, ListChecks, AlertCircle, User, CheckCheck, Star, MessageSquare, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/context/AuthContext";
 import { UserRatingBadge } from "@/components/UserRatingBadge";
@@ -36,6 +36,7 @@ const statusLabel: Record<string, string> = {
   assigned: "In Progress",
   completed: "Completed",
   accepted: "In Progress",
+  closed: "Closed",
 };
 
 const statusColor: Record<string, string> = {
@@ -96,6 +97,7 @@ export default function Dashboard() {
   const [reviewScore, setReviewScore] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [deletingTask, setDeletingTask] = useState<number | null>(null);
   
   const navigate = useNavigate();
 
@@ -347,6 +349,75 @@ export default function Dashboard() {
                       </Button>
                     </div>
                   )}
+
+                  {/* Status Toggle and Delete for Task Owner */}
+                  <div className="pt-3 border-t mt-2 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium">Status:</span>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant={task.status === "open" ? "default" : "outline"}
+                          onClick={async () => {
+                            try {
+                              const updated = await apiFetch(`/api/tasks/${task.id}`, {
+                                method: "PATCH",
+                                body: JSON.stringify({ status: "open" }),
+                              });
+                              setPostedTasks(postedTasks.map(t => t.id === updated.id ? updated : t));
+                            } catch (err: any) {
+                              alert(err?.message || "Failed to update status");
+                            }
+                          }}
+                        >
+                          Open
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={task.status === "completed" ? "default" : "outline"}
+                          onClick={async () => {
+                            try {
+                              const updated = await apiFetch(`/api/tasks/${task.id}`, {
+                                method: "PATCH",
+                                body: JSON.stringify({ status: "completed" }),
+                              });
+                              setPostedTasks(postedTasks.map(t => t.id === updated.id ? updated : t));
+                            } catch (err: any) {
+                              alert(err?.message || "Failed to update status");
+                            }
+                          }}
+                        >
+                          Completed
+                        </Button>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="w-full"
+                      onClick={async () => {
+                        if (!confirm("Are you sure you want to delete this task? This action cannot be undone.")) {
+                          return;
+                        }
+                        setDeletingTask(task.id);
+                        try {
+                          await apiFetch(`/api/tasks/${task.id}`, {
+                            method: "DELETE",
+                          });
+                          setPostedTasks(postedTasks.filter(t => t.id !== task.id));
+                          alert("Task deleted successfully");
+                        } catch (err: any) {
+                          alert(err?.message || "Failed to delete task");
+                        } finally {
+                          setDeletingTask(null);
+                        }
+                      }}
+                      disabled={deletingTask === task.id}
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      {deletingTask === task.id ? "Deleting..." : "Delete Task"}
+                    </Button>
+                  </div>
                 </Card>
               ))}
             </div>
