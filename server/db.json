@@ -13,6 +13,13 @@
       "name": "qweq",
       "email": "abcd@gmail.com",
       "passwordHash": "$2a$10$VhKzyT/Rg//N9jl/qUD./.y6ZYwucCLSzbOVuVX5jxplXzyPfny12"
+    },
+    {
+      "id": 3,
+      "createdAt": "2025-11-22T02:12:47.840Z",
+      "name": "IBRAHIM",
+      "email": "ibrahim.a@atriauniversity.edu.in",
+      "passwordHash": "$2a$10$qfPK2h2334Gv7yl45wpIDeP.iPlR87B1d5l6RahLxtjhSq7C9dRMu"
     }
   ],
   "tasks": [
@@ -43,7 +50,7 @@
     {
       "id": 2,
       "createdAt": "2025-11-21T23:15:43.467Z",
-      "status": "assigned",
+      "status": "completed",
       "title": "snkakx",
       "description": "lSDNQ;N; knqd/",
       "category": "professional",
@@ -61,7 +68,8 @@
           "acceptedAt": "2025-11-21T23:16:11.728Z"
         }
       ],
-      "assignedToUserId": 1
+      "assignedToUserId": 1,
+      "completedAt": "2025-11-21T23:58:59.134Z"
     },
     {
       "id": 3,
@@ -133,7 +141,7 @@
     }
   ],
   "_counters": {
-    "userId": 3,
+    "userId": 4,
     "taskId": 5,
     "profileId": 1,
     "reviewId": 2,

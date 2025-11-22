@@ -20,6 +20,7 @@ export default function PostTask() {
   const [budget, setBudget] = useState("");
   const [womenSafe, setWomenSafe] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [deadline, setDeadline] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,8 +51,15 @@ export default function PostTask() {
     setError(null);
     setSuccess(null);
 
-    if (!title || !description || !category || !urgency || !location) {
-      setError("Please fill in all required fields.");
+    if (!title || !description || !category || !urgency || !location || !deadline) {
+      setError("Please fill in all required fields including deadline.");
+      return;
+    }
+
+    // Validate deadline is in future
+    const deadlineDate = new Date(deadline);
+    if (deadlineDate <= new Date()) {
+      setError("Deadline must be in the future.");
       return;
     }
 
@@ -68,6 +76,7 @@ export default function PostTask() {
           budget: budget || null,
           womenSafe,
           verifiedOnly,
+          deadline: deadlineDate.toISOString(),
           latitude: latitude ?? undefined,
           longitude: longitude ?? undefined,
         }),
@@ -80,6 +89,7 @@ export default function PostTask() {
       setUrgency("");
       setLocation("");
       setBudget("");
+      setDeadline("");
       setWomenSafe(false);
       setVerifiedOnly(false);
       setLatitude(null);
@@ -183,6 +193,23 @@ export default function PostTask() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="deadline" className="text-base flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Deadline (Task Expiry) *
+                  </Label>
+                  <Input
+                    id="deadline"
+                    type="datetime-local"
+                    className="mt-2"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Task will be removed from listings after this date
+                  </p>
                 </div>
               </div>
             </div>

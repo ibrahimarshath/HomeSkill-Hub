@@ -34,7 +34,7 @@ export default function Signup() {
       <div className="container px-4 md:px-8 max-w-md">
         <Card className="p-8 shadow-large">
           <h1 className="text-3xl font-bold mb-2">Sign Up</h1>
-          <p className="text-muted-foreground mb-6">Create your HomeSkill-Hub account.</p>
+          <p className="text-muted-foreground mb-6">Create your TaskExchange account.</p>
           <form className="space-y-6" onSubmit={onSubmit}>
             <div>
               <Label htmlFor="name">Name</Label>

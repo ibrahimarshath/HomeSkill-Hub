@@ -104,7 +104,7 @@ export default function HowItWorks() {
           <div className="max-w-4xl mx-auto text-center">
             <Badge className="mb-4">Getting Started</Badge>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              How HomeSkill-Hub
+              How TaskExchange
               <br />
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Works

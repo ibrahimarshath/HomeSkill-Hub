@@ -14,6 +14,13 @@ const router = express.Router();
 router.get("/", (req, res) => {
   const { search, category, urgency } = req.query;
   let tasks = getAllTasks();
+  
+  // Filter out expired tasks
+  const now = new Date();
+  tasks = tasks.filter((t) => {
+    if (!t.deadline) return true;
+    return new Date(t.deadline) > now;
+  });
 
   if (search) {
     const q = String(search).toLowerCase();
@@ -37,9 +44,9 @@ router.get("/", (req, res) => {
 
 // Auth required: create task
 router.post("/", authMiddleware, (req, res) => {
-  const { title, description, category, urgency, location, budget, womenSafe, verifiedOnly, latitude, longitude } = req.body;
+  const { title, description, category, urgency, location, budget, womenSafe, verifiedOnly, latitude, longitude, deadline } = req.body;
 
-  if (!title || !description || !category || !urgency || !location) {
+  if (!title || !description || !category || !urgency || !location || !deadline) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
@@ -55,6 +62,7 @@ router.post("/", authMiddleware, (req, res) => {
     budget: budget || null,
     womenSafe: !!womenSafe,
     verifiedOnly: !!verifiedOnly,
+    deadline: deadline || null,
     posterId: req.user.id,
     latitude: latNum,
     longitude: lngNum,
@@ -66,13 +74,25 @@ router.post("/", authMiddleware, (req, res) => {
 // Auth required: tasks posted by current user
 router.get("/mine", authMiddleware, (req, res) => {
   const tasks = getTasksByPosterId(req.user.id);
-  res.json(tasks);
+  // Filter out expired tasks
+  const now = new Date();
+  const active = tasks.filter((t) => {
+    if (!t.deadline) return true;
+    return new Date(t.deadline) > now;
+  });
+  res.json(active);
 });
 
 // Auth required: tasks accepted by current user (placeholder for future accept flow)
 router.get("/accepted", authMiddleware, (req, res) => {
   const tasks = getTasksByAssigneeId(req.user.id);
-  res.json(tasks);
+  // Filter out expired tasks
+  const now = new Date();
+  const active = tasks.filter((t) => {
+    if (!t.deadline) return true;
+    return new Date(t.deadline) > now;
+  });
+  res.json(active);
 });
 
 // Auth required: update basic status (e.g., mark completed)

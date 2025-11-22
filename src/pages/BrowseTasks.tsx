@@ -28,6 +28,7 @@ type UiTask = {
   icon: React.ComponentType<{ className?: string }>;
   latitude?: number | null;
   longitude?: number | null;
+  deadline?: string | null;
 };
 
 function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -62,6 +63,38 @@ function getCategoryIcon(category: string) {
     default:
       return Briefcase;
   }
+}
+
+function getTimeRemaining(deadline: string | null | undefined) {
+  if (!deadline) return null;
+  const now = new Date();
+  const end = new Date(deadline);
+  const diff = end.getTime() - now.getTime();
+  
+  if (diff < 0) return null; // Expired
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (days > 0) {
+    return `${days}d ${hours}h left`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m left`;
+  } else {
+    return `${minutes}m left`;
+  }
+}
+
+function formatDeadlineDateTime(deadline: string | null | undefined) {
+  if (!deadline) return null;
+  const date = new Date(deadline);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export default function BrowseTasks() {
@@ -107,6 +140,7 @@ export default function BrowseTasks() {
             icon: Icon,
             latitude: typeof t.latitude === "number" ? t.latitude : null,
             longitude: typeof t.longitude === "number" ? t.longitude : null,
+            deadline: t.deadline || null,
           };
         });
         setTasks(mapped);
@@ -348,6 +382,12 @@ export default function BrowseTasks() {
                 <div className="flex items-center text-sm">
                   <span className="font-semibold text-primary">{task.price}</span>
                 </div>
+                {task.deadline && (
+                  <div className="flex items-center text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 w-fit">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {formatDeadlineDateTime(task.deadline)} ({getTimeRemaining(task.deadline) || "Expired"})
+                  </div>
+                )}
                 {task.status === "pending_approval" && (
                   <div className="flex items-center text-xs">
                     <Badge className="bg-amber-100 text-amber-800 border-amber-200">
@@ -424,6 +464,12 @@ export default function BrowseTasks() {
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-primary">{selectedTask.price}</span>
                     </div>
+                    {selectedTask.deadline && (
+                      <div className="flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 text-xs">
+                        <Clock className="h-4 w-4" />
+                        <span className="font-medium">Expires: {formatDeadlineDateTime(selectedTask.deadline)} ({getTimeRemaining(selectedTask.deadline) || "Expired"})</span>
+                      </div>
+                    )}
                     {selectedTask.womenSafe && (
                       <div className="flex items-center gap-2 text-safe text-xs">
                         <Shield className="h-4 w-4" /> Women safety verified

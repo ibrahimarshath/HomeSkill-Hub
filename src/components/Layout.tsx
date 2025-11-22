@@ -31,7 +31,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
               <Shield className="h-4 w-4 text-secondary absolute -right-1 -bottom-1" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              HomeSkill-Hub
+              TaskBuddy
             </span>
           </Link>
 
@@ -150,10 +150,10 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Users className="h-6 w-6 text-primary" />
-                <span className="font-bold text-lg">HomeSkill-Hub</span>
+                <span className="font-bold text-lg">TaskBuddy</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Building stronger communities through trusted task exchange and skill sharing.
+                Get a buddy for any task. Help is just a click away.
               </p>
             </div>
 
@@ -186,7 +186,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>&copy; 2025 HomeSkill-Hub. Built with care for communities.</p>
+            <p>&copy; 2025 TaskBuddy. Don't do it alone.</p>
           </div>
         </div>
       </footer>

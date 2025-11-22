@@ -20,6 +20,7 @@ type Task = {
   posterId?: number;
   assignedToUserId?: number;
   acceptances?: Array<{ userId: number; acceptedAt: string }>;
+  deadline?: string | null;
 };
 
 type HelperInfo = {
@@ -43,6 +44,38 @@ const statusColor: Record<string, string> = {
   completed: "bg-safe/10 text-safe border-safe/20",
   accepted: "bg-accent/10 text-accent border-accent/20",
 };
+
+function getTimeRemaining(deadline: string | null | undefined) {
+  if (!deadline) return null;
+  const now = new Date();
+  const end = new Date(deadline);
+  const diff = end.getTime() - now.getTime();
+  
+  if (diff < 0) return null; // Expired
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (days > 0) {
+    return `${days}d ${hours}h left`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m left`;
+  } else {
+    return `${minutes}m left`;
+  }
+}
+
+function formatDeadlineDateTime(deadline: string | null | undefined) {
+  if (!deadline) return null;
+  const date = new Date(deadline);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -253,6 +286,12 @@ export default function Dashboard() {
                     <MapPin className="h-4 w-4" />
                     <span>{task.location}</span>
                   </div>
+                  {task.deadline && (
+                    <div className="flex items-center gap-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 w-fit">
+                      <Clock className="h-3 w-3" />
+                      <span>{formatDeadlineDateTime(task.deadline)} ({getTimeRemaining(task.deadline) || "Expired"})</span>
+                    </div>
+                  )}
                   
                   {/* Show acceptances and assignment UI */}
                   {task.status === "pending_approval" && task.acceptances && task.acceptances.length > 0 && (
@@ -331,6 +370,12 @@ export default function Dashboard() {
                     <MapPin className="h-4 w-4" />
                     <span>{task.location}</span>
                   </div>
+                  {task.deadline && (
+                    <div className="flex items-center gap-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 w-fit">
+                      <Clock className="h-3 w-3" />
+                      <span>{formatDeadlineDateTime(task.deadline)} ({getTimeRemaining(task.deadline) || "Expired"})</span>
+                    </div>
+                  )}
 
                   {/* Show completion button if assigned to current user */}
                   {task.status === "assigned" && (

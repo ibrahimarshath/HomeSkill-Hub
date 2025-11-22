@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
-  res.json({ status: "ok", message: "HomeSkill-Hub API is running" });
+  res.json({ status: "ok", message: "TaskExchange API is running" });
 });
 
 app.get("/health", (req, res) => {

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
-const TOKEN_COOKIE = "homeskillhub_token";
+const TOKEN_COOKIE = "taskexchange_token";
 const TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
 
 function setTokenCookie(res, token) {
