@@ -112,6 +112,7 @@ export default function BrowseTasks() {
   const [radiusKm, setRadiusKm] = useState(10);
   const [userLat, setUserLat] = useState<number | null>(null);
   const [userLng, setUserLng] = useState<number | null>(null);
+  const [sortMode, setSortMode] = useState<"relevance" | "distance">("relevance");
   const [selectedTask, setSelectedTask] = useState<UiTask | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [chatTaskId, setChatTaskId] = useState<number | null>(null);
@@ -190,6 +191,18 @@ export default function BrowseTasks() {
       matchesNearby
     );
   });
+
+  // Attach distances and optionally sort by distance
+  const tasksWithDistance = filteredTasks.map((task) => {
+    const d = (userLat != null && userLng != null && task.latitude != null && task.longitude != null)
+      ? distanceKm(userLat, userLng, task.latitude, task.longitude)
+      : undefined;
+    return { ...task, __distance_km: d } as any;
+  });
+
+  const finalTasks = sortMode === "distance"
+    ? [...tasksWithDistance].sort((a: any, b: any) => (a.__distance_km ?? Number.POSITIVE_INFINITY) - (b.__distance_km ?? Number.POSITIVE_INFINITY))
+    : tasksWithDistance;
 
   const getUrgencyColor = (level: string) => {
     switch (level) {
@@ -340,6 +353,11 @@ export default function BrowseTasks() {
                   </Button>
                 ))}
               </div>
+              <div className="ml-4 flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Sort:</span>
+                <Button size="sm" variant={sortMode === "relevance" ? "default" : "outline"} onClick={() => setSortMode("relevance")}>Relevance</Button>
+                <Button size="sm" variant={sortMode === "distance" ? "default" : "outline"} onClick={() => setSortMode("distance")}>Nearest</Button>
+              </div>
             </div>
           </div>
         </Card>
@@ -354,11 +372,11 @@ export default function BrowseTasks() {
               <AlertCircle className="h-4 w-4" /> {error}
             </p>
           )}
-          {!loading && !error && filteredTasks.length === 0 && (
+          {!loading && !error && finalTasks.length === 0 && (
             <p className="text-muted-foreground col-span-full">No tasks found.</p>
           )}
           {!loading && !error &&
-            filteredTasks.map((task) => (
+            finalTasks.map((task: any) => (
             <Card key={task.id} className="p-6 hover:shadow-large transition-all hover:-translate-y-1 cursor-pointer group">
               <div className="flex items-start justify-between mb-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -398,6 +416,9 @@ export default function BrowseTasks() {
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground font-medium">{task.location}</span>
+                  {task.__distance_km !== undefined && userLat != null && userLng != null && (
+                    <span className="ml-2 text-xs text-muted-foreground">• {task.__distance_km.toFixed(1)} km</span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-base">
                   <span className="font-bold text-primary text-lg">

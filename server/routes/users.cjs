@@ -7,26 +7,6 @@ const { authMiddleware } = require("../middleware/auth.cjs");
 
 const router = express.Router();
 
-// Auth required: upload profile photo (must be before /:id route)
-router.post("/upload-photo", authMiddleware, upload.single("photo"), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No photo uploaded" });
-    }
-
-    const photoUrl = `/uploads/profiles/${req.file.filename}`;
-    
-    // Update user's profile photo
-    const user = getUserById(req.user.id);
-    if (user) {
-      updateUser(req.user.id, { profilePhoto: photoUrl });
-    }
-
-    res.json({ url: photoUrl });
-  } catch (error) {
-    res.status(500).json({ message: error.message || "Failed to upload photo" });
-  }
-});
 
 // Configure multer for profile photo uploads
 const storage = multer.diskStorage({

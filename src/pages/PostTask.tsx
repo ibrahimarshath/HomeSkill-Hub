@@ -371,13 +371,39 @@ export default function PostTask() {
                   <MapPin className="h-4 w-4" />
                   Google Maps Link (Optional)
                 </Label>
-                <Input
-                  id="googleMapsLink"
-                  placeholder="Paste Google Maps link here (e.g., https://maps.google.com/?q=12.9716,77.5946)"
-                  className="mt-2"
-                  value={googleMapsLink}
-                  onChange={(e) => handleGoogleMapsLinkChange(e.target.value)}
-                />
+                <div className="flex gap-2 items-start">
+                  <Input
+                    id="googleMapsLink"
+                    placeholder="Paste Google Maps link here (e.g., https://maps.google.com/?q=12.9716,77.5946)"
+                    className="mt-2"
+                    value={googleMapsLink}
+                    onChange={(e) => handleGoogleMapsLinkChange(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => {
+                      if (!navigator.geolocation) {
+                        alert('Geolocation is not supported by your browser.');
+                        return;
+                      }
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const lat = pos.coords.latitude;
+                          const lng = pos.coords.longitude;
+                          setLatitude(lat);
+                          setLongitude(lng);
+                          // If location text is empty, set a friendly label
+                          if (!location) setLocation(`Current location (${lat.toFixed(6)}, ${lng.toFixed(6)})`);
+                        },
+                        () => alert('Could not get your current location.')
+                      );
+                    }}
+                  >
+                    Use My Location
+                  </Button>
+                </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Paste a Google Maps share link to help helpers find your location easily
                 </p>
@@ -386,6 +412,21 @@ export default function PostTask() {
                     ✓ Coordinates extracted: {latitude.toFixed(6)}, {longitude.toFixed(6)}
                   </p>
                 )}
+                {/* Manual latitude/longitude fields (optional) */}
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <Input
+                    placeholder="Latitude"
+                    value={latitude ?? ""}
+                    onChange={(e) => setLatitude(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full"
+                  />
+                  <Input
+                    placeholder="Longitude"
+                    value={longitude ?? ""}
+                    onChange={(e) => setLongitude(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full"
+                  />
+                </div>
               </div>
 
               <div>

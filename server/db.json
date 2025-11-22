@@ -45,6 +45,28 @@
       "name": "M R Mohammed Ibrahim Arshath",
       "email": "dibrahimarshath.mr@atriauniversity.edu.in",
       "passwordHash": "$2a$10$k2SEFWB5Z2XdfRQcqoUbpOhWKXibyPVEVwqUhlGDh.6BgMODn7By2"
+    },
+    {
+      "id": 7,
+      "createdAt": "2025-11-22T07:07:19.448Z",
+      "firstName": "mee",
+      "lastName": "abc",
+      "gender": "female",
+      "phoneNumber": "12345678",
+      "name": "mee abc",
+      "email": "ash@gmail.com",
+      "passwordHash": "$2a$10$Qh3m/BEhShT9iM5lvbvZ5eBxQQxDMtri5ma6B9jJKXmngxegjfjLG"
+    },
+    {
+      "id": 8,
+      "createdAt": "2025-11-22T07:26:05.736Z",
+      "firstName": "munni",
+      "lastName": "hi",
+      "gender": "other",
+      "phoneNumber": "123456789",
+      "name": "munni hi",
+      "email": "mun@gmail.com",
+      "passwordHash": "$2a$10$zXRA91KfD6g1xttiqcqPq.oWzQwFvf8NiYx8xfBCNguD0oP4iM1J."
     }
   ],
   "tasks": [
@@ -145,6 +167,104 @@
       ],
       "assignedToUserId": 1,
       "completedAt": "2025-11-21T23:34:26.289Z"
+    },
+    {
+      "id": 8,
+      "createdAt": "2025-11-22T07:08:24.064Z",
+      "status": "open",
+      "title": "abcd",
+      "description": "abcd",
+      "category": "home",
+      "urgency": "high",
+      "location": "hebbal",
+      "budget": "123",
+      "womenSafe": false,
+      "deadline": "2025-11-22T07:09:00.000Z",
+      "posterId": 7,
+      "images": [
+        "/uploads/task-1763795304037-32465268.jpg"
+      ],
+      "googleMapsLink": "hebbal"
+    },
+    {
+      "id": 9,
+      "createdAt": "2025-11-22T07:16:51.349Z",
+      "status": "open",
+      "title": "ags",
+      "description": "askhdkjasn",
+      "category": "repair",
+      "urgency": "medium",
+      "location": "hebbal ",
+      "budget": "615423",
+      "womenSafe": false,
+      "deadline": "2025-11-22T07:18:00.000Z",
+      "posterId": 1,
+      "images": [
+        "/uploads/task-1763795811325-956515334.jpg"
+      ],
+      "googleMapsLink": null
+    },
+    {
+      "id": 10,
+      "createdAt": "2025-11-22T07:23:30.860Z",
+      "status": "pending_approval",
+      "title": "ksahlafhksndflkjna",
+      "description": "kajdbfld f hb",
+      "category": "teaching",
+      "urgency": "medium",
+      "location": "Current location (13.032920, 77.591611)",
+      "budget": "5152",
+      "womenSafe": false,
+      "deadline": "2025-11-28T07:23:00.000Z",
+      "posterId": 1,
+      "latitude": 13.032920281056738,
+      "longitude": 77.5916110360387,
+      "images": [
+        "/uploads/task-1763796210831-838130374.jpg"
+      ],
+      "googleMapsLink": null,
+      "acceptances": [
+        {
+          "userId": 8,
+          "acceptedAt": "2025-11-22T07:26:14.196Z"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "createdAt": "2025-11-22T07:24:33.300Z",
+      "status": "open",
+      "title": "3tb av",
+      "description": "dvk jasidfhi",
+      "category": "repair",
+      "urgency": "low",
+      "location": "Current location (13.032884, 77.591619) hebbal , etc etc ",
+      "budget": null,
+      "womenSafe": false,
+      "deadline": "2025-11-27T07:24:00.000Z",
+      "posterId": 1,
+      "latitude": 13.032883588353535,
+      "longitude": 77.59161879806827,
+      "images": [],
+      "googleMapsLink": null
+    },
+    {
+      "id": 12,
+      "createdAt": "2025-11-22T07:31:14.860Z",
+      "status": "open",
+      "title": ",asnx",
+      "description": "smbcmzn",
+      "category": "care",
+      "urgency": "high",
+      "location": "hebbal",
+      "budget": null,
+      "womenSafe": false,
+      "deadline": "2025-12-06T07:30:00.000Z",
+      "posterId": 1,
+      "latitude": 13.04383,
+      "longitude": 77.572107,
+      "images": [],
+      "googleMapsLink": null
     }
   ],
   "profiles": [],
@@ -184,14 +304,30 @@
       "fromUserId": 4,
       "score": 4,
       "taskId": 5
+    },
+    {
+      "id": 3,
+      "createdAt": "2025-11-22T07:27:13.780Z",
+      "toUserId": 8,
+      "fromUserId": 1,
+      "score": 5,
+      "taskId": null
+    },
+    {
+      "id": 4,
+      "createdAt": "2025-11-22T07:27:14.504Z",
+      "toUserId": 8,
+      "fromUserId": 1,
+      "score": 5,
+      "taskId": null
     }
   ],
   "_counters": {
-    "userId": 7,
-    "taskId": 8,
+    "userId": 9,
+    "taskId": 13,
     "profileId": 1,
     "reviewId": 3,
-    "ratingId": 3,
+    "ratingId": 5,
     "messageId": 2
   },
   "messages": [

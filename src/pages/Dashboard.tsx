@@ -17,6 +17,8 @@ type Task = {
   status: string;
   urgency: string;
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
   posterId?: number;
   assignedToUserId?: number;
   acceptances?: Array<{ userId: number; acceptedAt: string }>;
@@ -90,6 +92,8 @@ export default function Dashboard() {
   const [helpers, setHelpers] = useState<HelperInfo[]>([]);
   const [helperDetails, setHelperDetails] = useState<Record<number, any>>({});
   const [assigningHelper, setAssigningHelper] = useState<number | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [sortBy, setSortBy] = useState<"default" | "distance">("default");
   
   // Review state
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
@@ -129,6 +133,53 @@ export default function Dashboard() {
 
     loadDashboard();
   }, [user]);
+
+  // Haversine formula to compute distance in kilometers
+  const haversineDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (v: number) => (v * Math.PI) / 180;
+    const R = 6371; // Earth radius in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const useBrowserLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      () => alert("Could not get your current location.")
+    );
+  };
+
+  // Return sorted copies based on sortBy and currentLocation
+  const getSortedTasks = (tasks: Task[]) => {
+    if (sortBy !== "distance" || !currentLocation) return tasks;
+
+    return [...tasks]
+      .map((t) => ({
+        ...t,
+        __distance_km:
+          typeof t.latitude === "number" && typeof t.longitude === "number"
+            ? haversineDistanceKm(currentLocation.lat, currentLocation.lng, t.latitude, t.longitude)
+            : undefined,
+      }))
+      .sort((a: any, b: any) => {
+        const da = a.__distance_km ?? Number.POSITIVE_INFINITY;
+        const db = b.__distance_km ?? Number.POSITIVE_INFINITY;
+        return da - db;
+      });
+  };
 
   const handleAssignTask = async (task: Task) => {
     if (!task.acceptances || task.acceptances.length === 0) return;
@@ -260,20 +311,50 @@ export default function Dashboard() {
 
         {loading && <p className="text-muted-foreground mb-4">Loading your tasks...</p>}
 
-        <div className="grid md:grid-cols-2 gap-8">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={useBrowserLocation}>
+                  Use My Location
+                </Button>
+                <Input
+                  placeholder="lat"
+                  value={currentLocation?.lat ?? ""}
+                  onChange={(e) => setCurrentLocation((prev) => ({ ...(prev ?? { lat: NaN, lng: NaN }), lat: Number(e.target.value) }))}
+                  className="w-28"
+                />
+                <Input
+                  placeholder="lng"
+                  value={currentLocation?.lng ?? ""}
+                  onChange={(e) => setCurrentLocation((prev) => ({ ...(prev ?? { lat: NaN, lng: NaN }), lng: Number(e.target.value) }))}
+                  className="w-28"
+                />
+              </div>
+
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Sort:</span>
+                <Button size="sm" variant={sortBy === "default" ? "default" : "outline"} onClick={() => setSortBy("default")}>
+                  Default
+                </Button>
+                <Button size="sm" variant={sortBy === "distance" ? "default" : "outline"} onClick={() => setSortBy("distance")}>
+                  By Distance
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
           {/* Posted Tasks */}
           <div>
             <div className="flex items-center gap-2 mb-4">
               <ListChecks className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-semibold">Your Posted Tasks</h2>
             </div>
-            {postedTasks.length === 0 && !loading && (
+            {getSortedTasks(postedTasks).length === 0 && !loading && (
               <Card className="p-4 text-sm text-muted-foreground">
                 You haven't posted any tasks yet. <Link to="/post-task" className="text-primary underline">Post your first task</Link>.
               </Card>
             )}
             <div className="space-y-4 mt-2">
-              {postedTasks.map((task) => (
+              {getSortedTasks(postedTasks).map((task: any) => (
                 <Card key={task.id} className="p-4 flex flex-col gap-3">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="font-semibold">{task.title}</h3>
@@ -297,6 +378,9 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4" />
                     <span>{task.location}</span>
+                    {task.__distance_km !== undefined && currentLocation && (
+                      <span className="ml-2 text-xs text-muted-foreground">• {task.__distance_km.toFixed(1)} km</span>
+                    )}
                   </div>
                   {task.deadline && (
                     <div className="flex items-center gap-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 w-fit">
@@ -429,13 +513,13 @@ export default function Dashboard() {
               <CheckCircle2 className="h-5 w-5 text-secondary" />
               <h2 className="text-xl font-semibold">Tasks You've Accepted</h2>
             </div>
-            {acceptedTasks.length === 0 && !loading && (
+            {getSortedTasks(acceptedTasks).length === 0 && !loading && (
               <Card className="p-4 text-sm text-muted-foreground">
                 You haven't accepted any tasks yet.
               </Card>
             )}
             <div className="space-y-4 mt-2">
-              {acceptedTasks.map((task) => (
+              {getSortedTasks(acceptedTasks).map((task: any) => (
                 <Card key={task.id} className="p-4 flex flex-col gap-3">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="font-semibold">{task.title}</h3>
@@ -459,6 +543,9 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4" />
                     <span>{task.location}</span>
+                    {task.__distance_km !== undefined && currentLocation && (
+                      <span className="ml-2 text-xs text-muted-foreground">• {task.__distance_km.toFixed(1)} km</span>
+                    )}
                   </div>
                   {task.deadline && (
                     <div className="flex items-center gap-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 w-fit">
