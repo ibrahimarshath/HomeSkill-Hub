@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Shield } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Login() {
   const { login } = useAuth();
@@ -21,8 +22,12 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
-      await login({ email, password });
-      navigate("/");
+      const data = await login({ email, password });
+      if (data && data.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to log in");
     } finally {
@@ -36,6 +41,14 @@ export default function Login() {
         <Card className="p-8 shadow-large">
           <h1 className="text-3xl font-bold mb-2">Log In</h1>
           <p className="text-muted-foreground mb-6">Access your TaskExchange account.</p>
+          
+          <Alert className="mb-6 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+            <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              <strong>Admin Login:</strong> Use <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">admin1@gmail.com</code> with password <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">admin123</code>
+            </AlertDescription>
+          </Alert>
+
           <form className="space-y-6" onSubmit={onSubmit}>
             <div>
               <Label htmlFor="email">Email</Label>

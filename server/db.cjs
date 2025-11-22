@@ -100,6 +100,20 @@ function updateUser(id, updates) {
   return db.users[idx];
 }
 
+function getAllUsers() {
+  const db = readDb();
+  return db.users;
+}
+
+function deleteUser(id) {
+  const db = readDb();
+  const idx = db.users.findIndex((u) => u.id === id);
+  if (idx === -1) return null;
+  const deleted = db.users.splice(idx, 1)[0];
+  writeDb(db);
+  return deleted;
+}
+
 // Task helpers
 function createTask(task) {
   const db = readDb();
@@ -228,6 +242,8 @@ module.exports = {
   createUser,
   getUserById,
   updateUser,
+  getAllUsers,
+  deleteUser,
   createTask,
   getAllTasks,
   getTasksByPosterId,

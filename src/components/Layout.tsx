@@ -64,6 +64,14 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             {user ? (
               <>
                 <span className="text-sm text-muted-foreground">Hi, {user.name}</span>
+                {user.role === "admin" && (
+                  <Link to="/admin">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Shield className="h-4 w-4" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                 <Link to="/my-profile">
                   <Button variant="outline" size="sm" className="gap-2">
                     <UserIcon className="h-4 w-4" />
@@ -110,6 +118,14 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
               <div className="flex flex-col space-y-2 pt-2 border-t">
                 {user ? (
                   <>
+                    {user.role === "admin" && (
+                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full justify-start gap-2">
+                          <Shield className="h-4 w-4" />
+                          Admin
+                        </Button>
+                      </Link>
+                    )}
                     <Link to="/my-profile" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full justify-start gap-2">
                         <UserIcon className="h-4 w-4" />

@@ -15,6 +15,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import UserProfile from "./pages/UserProfile";
 import MyProfile from "./pages/MyProfile";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/my-profile" element={<MyProfile />} />
             <Route path="/users/:id" element={<UserProfile />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/women-safety" element={<WomenSafety />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/login" element={<Login />} />

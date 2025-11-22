@@ -4,6 +4,7 @@ export type AuthUser = {
   id: number;
   name: string;
   email: string;
+  role?: string;
 };
 
 type AuthContextValue = {
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ email, password }),
     });
     setUser(data);
+    return data;
   };
 
   const logout: AuthContextValue["logout"] = async () => {

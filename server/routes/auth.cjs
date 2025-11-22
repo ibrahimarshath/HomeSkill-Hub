@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const { findUserByEmail, createUser, getUserById } = require("../db.cjs");
+const { findUserByEmail, createUser, getUserById, updateUser } = require("../db.cjs");
 const { JWT_SECRET, TOKEN_COOKIE, TOKEN_MAX_AGE, setTokenCookie, authMiddleware } = require("../middleware/auth.cjs");
 
 const router = express.Router();
@@ -23,6 +23,10 @@ router.post("/signup", async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const name = `${firstName} ${lastName}`;
 
+    // Check if this is an admin registration
+    const isAdmin = email.toLowerCase() === "admin1@gmail.com" && password === "admin123";
+    const role = isAdmin ? "admin" : "user";
+
     const user = createUser({
       firstName,
       lastName,
@@ -31,9 +35,10 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       passwordHash,
+      role,
     });
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, {
       expiresIn: TOKEN_MAX_AGE,
     });
 
@@ -43,6 +48,7 @@ router.post("/signup", async (req, res) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      role: user.role,
     });
   } catch (err) {
     console.error("Signup error", err);
@@ -68,7 +74,17 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+    // Check if this is admin login and grant admin role if credentials match
+    const isAdminLogin = email.toLowerCase() === "admin1@gmail.com" && password === "admin123";
+    let userRole = user.role || "user";
+    
+    // If admin credentials match, ensure user has admin role
+    if (isAdminLogin && userRole !== "admin") {
+      updateUser(user.id, { role: "admin" });
+      userRole = "admin";
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email, role: userRole }, JWT_SECRET, {
       expiresIn: TOKEN_MAX_AGE,
     });
 
@@ -78,6 +94,7 @@ router.post("/login", async (req, res) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      role: userRole,
     });
   } catch (err) {
     console.error("Login error", err);
@@ -100,6 +117,7 @@ router.get("/me", authMiddleware, (req, res) => {
     id: user.id, 
     name: user.name, 
     email: user.email,
+    role: user.role || "user",
     firstName: user.firstName || null,
     lastName: user.lastName || null,
     gender: user.gender || null,

@@ -8,11 +8,38 @@ const taskRoutes = require("./routes/tasks.cjs");
 const userRoutes = require("./routes/users.cjs");
 const ratingRoutes = require("./routes/ratings.cjs");
 const chatRoutes = require("./routes/chat.cjs");
+const adminRoutes = require("./routes/admin.cjs");
 
 const PORT = process.env.PORT || 4001;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
 const app = express();
+
+// Ensure a default admin user exists in the dev DB
+try {
+  const { findUserByEmail, createUser } = require("./db.cjs");
+  const bcrypt = require("bcryptjs");
+
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin1@gmail.com";
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+
+  const existingAdmin = findUserByEmail(ADMIN_EMAIL);
+  if (!existingAdmin) {
+    const passwordHash = bcrypt.hashSync(ADMIN_PASSWORD, 10);
+    createUser({
+      firstName: "Admin",
+      lastName: "User",
+      name: "Admin User",
+      email: ADMIN_EMAIL,
+      passwordHash,
+      role: "admin",
+    });
+    console.log(`Created default admin: ${ADMIN_EMAIL}`);
+  }
+} catch (err) {
+  // Non-fatal: log and continue
+  console.error("Failed to ensure admin user:", err && err.message ? err.message : err);
+}
 
 app.use(
   cors({
@@ -40,6 +67,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ratings", ratingRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
