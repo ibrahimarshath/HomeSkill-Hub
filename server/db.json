@@ -1,0 +1,142 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "createdAt": "2025-11-21T23:06:56.188Z",
+      "name": "vineeth",
+      "email": "munni@gmail.com",
+      "passwordHash": "$2a$10$dGIzB0jDxVVTxqcL5nk91.LoG.dBuOlD7H.xejah31IXSSjqDF8tC"
+    },
+    {
+      "id": 2,
+      "createdAt": "2025-11-21T23:07:56.438Z",
+      "name": "qweq",
+      "email": "abcd@gmail.com",
+      "passwordHash": "$2a$10$VhKzyT/Rg//N9jl/qUD./.y6ZYwucCLSzbOVuVX5jxplXzyPfny12"
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "createdAt": "2025-11-21T23:08:26.893Z",
+      "status": "completed",
+      "title": ",nscnSM",
+      "description": "sf;BV.Jns,M.Nnv",
+      "category": "care",
+      "urgency": "medium",
+      "location": "hebbal",
+      "budget": "12",
+      "womenSafe": true,
+      "verifiedOnly": false,
+      "posterId": 2,
+      "latitude": 12.9564672,
+      "longitude": 77.6208384,
+      "assignedToUserId": 1,
+      "acceptances": [
+        {
+          "userId": 1,
+          "acceptedAt": "2025-11-21T23:16:24.920Z"
+        }
+      ],
+      "completedAt": "2025-11-21T23:20:46.233Z"
+    },
+    {
+      "id": 2,
+      "createdAt": "2025-11-21T23:15:43.467Z",
+      "status": "assigned",
+      "title": "snkakx",
+      "description": "lSDNQ;N; knqd/",
+      "category": "professional",
+      "urgency": "low",
+      "location": "hebbal",
+      "budget": "23",
+      "womenSafe": false,
+      "verifiedOnly": false,
+      "posterId": 2,
+      "latitude": 12.9564672,
+      "longitude": 77.6208384,
+      "acceptances": [
+        {
+          "userId": 1,
+          "acceptedAt": "2025-11-21T23:16:11.728Z"
+        }
+      ],
+      "assignedToUserId": 1
+    },
+    {
+      "id": 3,
+      "createdAt": "2025-11-21T23:27:01.236Z",
+      "status": "pending_approval",
+      "title": "c<C , C",
+      "description": "zs  c,SC",
+      "category": "repair",
+      "urgency": "low",
+      "location": "1",
+      "budget": "23",
+      "womenSafe": false,
+      "verifiedOnly": false,
+      "posterId": 2,
+      "latitude": 12.9564672,
+      "longitude": 77.6208384,
+      "acceptances": [
+        {
+          "userId": 1,
+          "acceptedAt": "2025-11-21T23:27:25.995Z"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "createdAt": "2025-11-21T23:32:29.316Z",
+      "status": "completed",
+      "title": "sdfghjkl;",
+      "description": "yvubijnkml,';.'/\n",
+      "category": "teaching",
+      "urgency": "medium",
+      "location": "hebbal",
+      "budget": "12",
+      "womenSafe": false,
+      "verifiedOnly": false,
+      "posterId": 2,
+      "latitude": 12.9564672,
+      "longitude": 77.6208384,
+      "acceptances": [
+        {
+          "userId": 1,
+          "acceptedAt": "2025-11-21T23:33:21.184Z"
+        }
+      ],
+      "assignedToUserId": 1,
+      "completedAt": "2025-11-21T23:34:26.289Z"
+    }
+  ],
+  "profiles": [],
+  "reviews": [
+    {
+      "id": 1,
+      "createdAt": "2025-11-21T23:34:41.657Z",
+      "toUserId": 1,
+      "fromUserId": 2,
+      "taskId": 4,
+      "comment": "ebuzenphrnWURnjeipozjtpoeJtjW{(",
+      "score": 5
+    }
+  ],
+  "ratings": [
+    {
+      "id": 1,
+      "createdAt": "2025-11-21T23:34:41.655Z",
+      "toUserId": 1,
+      "fromUserId": 2,
+      "score": 5,
+      "taskId": 4
+    }
+  ],
+  "_counters": {
+    "userId": 3,
+    "taskId": 5,
+    "profileId": 1,
+    "reviewId": 2,
+    "ratingId": 2
+  }
+}
